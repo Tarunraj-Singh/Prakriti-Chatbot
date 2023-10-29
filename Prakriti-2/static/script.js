@@ -69,19 +69,8 @@ const questions = [
 ];
 
 let currentQuestion = 0;
+let userPrakriti = "";
 
-// Create a chat message with options
-// const createQuestionMessage = (question) => {
-//   const questionMessage = createChatLi(question.question, "incoming");
-//   question.options.forEach((option) => {
-//     const optionButton = document.createElement("button");
-//     optionButton.textContent = option;
-//     optionButton.classList.add("option-button");
-//     opttionMessage.appendChild(optionButton);
-//   });ionButton.addEventListener("click", () => handleUserChoice(option));
-//     ques
-//   chatbox.appendChild(questionMessage);
-// };
 const createQuestionMessage = (question) => {
   const questionMessage = createChatLi(question.question, "incoming");
   chatbox.appendChild(questionMessage); // Append the question message
@@ -121,29 +110,15 @@ const handleUserChoice = (choice) => {
   if (currentQuestion != 0) {
     // Skip storing choice for the welcome message
     userChoices.push([choice]);
-    
-  } 
-  
+
+  }
+
   // userChoices.push([choice]); // Store the user's choice in the array
   const userChoiceMessage = createChatLi(`${choice}`, "outgoing");
   chatbox.appendChild(userChoiceMessage);
   sendBotResponse(choice); // Send the user's choice to the bot
 };
 
-// const sendBotResponse = (userChoice) => {
-//   // Simulate a bot response based on user choice (replace with your logic)
-//   setTimeout(() => {
-//     const botResponse = `You selected ${userChoice}`;
-//     chatbox.appendChild(createChatLi(botResponse, "incoming"));
-//     if (currentQuestion < questions.length - 1) {
-//       currentQuestion++; // Move to the next question
-//       createQuestionMessage(questions[currentQuestion]);
-//     } else {
-//       // Chatbot reached the end of questions
-//       chatInput.disabled = true; // Disable input after finishing questions
-//     }
-//   }, 1000); // Simulate a 1-second delay
-// };
 const sendBotResponse = (userChoice) => {
   // Simulate a bot response based on user choice (replace with your logic)
   setTimeout(() => {
@@ -172,9 +147,15 @@ const sendBotResponse = (userChoice) => {
           }
         })
         .then((data) => {
-          console.log(data);  // Add this line to log the data
+          userPrakriti = data.botResponse; // Set the user's Prakriti
           const botResponseMessage = createChatLi(data.botResponse, "incoming");
           chatbox.appendChild(botResponseMessage);
+          console.log(userPrakriti);
+          const words = userPrakriti.split(' ');
+          userPrakriti = words[words.length - 1];
+          userPrakriti = userPrakriti.trim().replace(/\.$/, ''); // Remove trailing period if it exists
+          console.log(userPrakriti);
+          displayRecommendations(userPrakriti);
         })
         .catch((error) => {
           console.error("Error:", error);
@@ -208,4 +189,74 @@ chatInput.addEventListener("keydown", (e) => {
 });
 
 // Start the chat by displaying the first question
+// createQuestionMessage(questions[currentQuestion]);
+
+function displayRecommendations(userPrakriti) {
+  const prakritiData = {
+    Vata: {
+      lifestyleRecommendations: ["Ensure you get enough restful sleep.", "Keep warm, as Vata types are sensitive to cold."],
+      yogaSuggestions: ["Child's Pose (Balasana)", "Corpse Pose (Savasana)", "Camel Pose (Ustrasana)"],
+      productSuggestions: ["Balarishta(Arishtam)", "Dhanwantharam Kwath"],
+      medicineSuggestions: ["Ashwagandha", "Triphala"],
+    },
+    Pitta: {
+      lifestyleRecommendations: ["Consume foods that have a cooling effect on the body, such as sweet, bitter, and astringent tastes.", "Implement stress-reduction techniques, like meditation, deep breathing exercises, and spending time in nature."],
+      yogaSuggestions: ["Seated Forward Bend (Paschimottanasana)", "Bridge Pose (Setu Bandha Sarvangasana)"],
+      productSuggestions: ["Alsactil Tablet", "Mahathikthaka Gritham Capsules"],
+      medicineSuggestions: ["Aloe Vera Gel", "Shatavari"],
+    },
+    Kapha: {
+      lifestyleRecommendations: ["Consume warm, light, and spicy foods.Limit dairy, sweets, and heavy, oily, or fried foods", "Engage in regular physical activity, such as brisk walking, to stimulate circulation."],
+      yogaSuggestions: ["Surya Namaskar (Sun Salutation)", "Uttanasana (Forward Bend)"],
+      productSuggestions: ["Tuss Nil Syrup", "Dasamoola - kaduthrayam Kwath Tablet"],
+      medicineSuggestions: ["Triphala Churna", "Tulsi (Holy Basil) Tea"],
+    },
+  };
+
+  const userRecommendations = prakritiData[userPrakriti].lifestyleRecommendations;
+  const userYogaSuggestions = prakritiData[userPrakriti].yogaSuggestions;
+  const userProductSuggestions = prakritiData[userPrakriti].productSuggestions;
+  const userMedicineSuggestions = prakritiData[userPrakriti].medicineSuggestions;
+
+  const recommendationsSection = document.querySelector(".Recommendations");
+  const recommendationsHeader = recommendationsSection.querySelector("header h2");
+  const recommendationsContent = document.createElement("ul");
+
+  recommendationsHeader.textContent = "Lifestyle Recommendations & Yoga Suggestions";
+
+  userRecommendations.forEach((recommendation) => {
+    const p = document.createElement("li");
+    p.textContent = recommendation;
+    recommendationsContent.appendChild(p);
+  });
+
+  userYogaSuggestions.forEach((suggestion) => {
+    const p = document.createElement("li");
+    p.textContent = suggestion;
+    recommendationsContent.appendChild(p);
+  });
+
+  recommendationsSection.appendChild(recommendationsContent);
+
+  const suggestionsSection = document.querySelector(".Suggestions");
+  const suggestionsHeader = suggestionsSection.querySelector("header h2");
+  const suggestionsContent = document.createElement("ul");
+
+  suggestionsHeader.textContent = "Product & Medicine Suggestions";
+
+  userProductSuggestions.forEach((product) => {
+    const p = document.createElement("li");
+    p.textContent = product;
+    suggestionsContent.appendChild(p);
+  });
+
+  userMedicineSuggestions.forEach((medicine) => {
+    const p = document.createElement("li");
+    p.textContent = medicine;
+    suggestionsContent.appendChild(p);
+  });
+
+  suggestionsSection.appendChild(suggestionsContent);
+}
+
 createQuestionMessage(questions[currentQuestion]);
